@@ -36,3 +36,6 @@ let g:nerdtree_tabs_open_on_gui_startup=0
 syntax on
 colorscheme slate
 map <C-n> :NERDTreeToggle<CR>
+
+highlight OverLength ctermbg=red ctermfg=white guibg=#592929
+match OverLength /\%81v.\+/
