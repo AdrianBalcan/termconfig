@@ -1,4 +1,7 @@
 set nocompatible
+filetype off
+syntax on
+filetype plugin indent on
 call pathogen#infect()
 call pathogen#helptags()
 set hidden
@@ -36,3 +39,29 @@ let g:nerdtree_tabs_open_on_gui_startup=0
 syntax on
 colorscheme slate
 map <C-n> :NERDTreeToggle<CR>
+set bdir-=.
+set bdir+=/tmp
+set dir-=.
+set dir+=/tmp
+map <Leader> <Plug>(easymotion-prefix)
+nmap s <Plug>(easymotion-overwin-f2)
+nmap <Leader>f <Plug>(easymotion-overwin-f)
+
+"let g:syntastic_always_populate_loc_list = 1
+"let g:syntastic_auto_loc_list = 1
+"let g:syntastic_check_on_open = 1
+"let g:syntastic_check_on_wq = 0
+highlight ColorColumn ctermbg=0
+set colorcolumn=80
+
+" air-line
+let g:airline_powerline_fonts = 1
+
+"autocmd VimEnter * :IndentGuidesEnable
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_start_level = 2
+let g:indent_guides_guide_size = 1
+"autocmd VimEnter * :hi IndentGuidesEven ctermbg=None    
+"let g:airline#extensions#tabline#enabled = 1
+"let g:airline_section_a = airline#section#create(['mode', ' ', gitbranch#name()])
+let g:airline_theme = 'light'
