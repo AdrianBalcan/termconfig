@@ -4,6 +4,7 @@ syntax on
 filetype plugin indent on
 call pathogen#infect()
 call pathogen#helptags()
+set encoding=utf-8
 set hidden
 set wildmenu
 set showcmd
@@ -46,6 +47,8 @@ set dir+=/tmp
 map <Leader> <Plug>(easymotion-prefix)
 nmap s <Plug>(easymotion-overwin-f2)
 nmap <Leader>f <Plug>(easymotion-overwin-f)
+xnoremap p "_dP
+
 
 "let g:syntastic_always_populate_loc_list = 1
 "let g:syntastic_auto_loc_list = 1
@@ -65,3 +68,5 @@ let g:indent_guides_guide_size = 1
 "let g:airline#extensions#tabline#enabled = 1
 "let g:airline_section_a = airline#section#create(['mode', ' ', gitbranch#name()])
 let g:airline_theme = 'light'
+let g:gist_open_browser_after_post = 1
+
