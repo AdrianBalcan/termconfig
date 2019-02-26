@@ -28,19 +28,12 @@ declare -x EDITOR=vim
 declare -x PATH="/usr/local/Cellar/vim/8.0.1500/bin/vim:$PATH"
 alias k="kubectl"
 alias t="terraform"
+alias khelm="~/.kube/khelm.py get images"
 alias awsblu="yes | cp ~/.aws/blugento.config ~/.aws/config && yes | cp ~/.aws/blugento.credentials ~/.aws/credentials"
-alias awscamv="yes | cp ~/.aws/camv.config ~/.aws/config && yes | cp ~/.aws/camv.credentials ~/.aws/credentials"
-alias gdev="gcloud config set project camversity-183908"
-alias gprod="gcloud config set project camversity-prod"
-alias ncos_qa="gcloud config set project jlr-dl-ncos-qa"
 function kncos {
-  gcloud container clusters get-credentials $( cat ~/.kube/ncos | fzf ) --project jlr-dl-ncos-qa
+  gcloud container clusters get-credentials $( cat ~/.kube/ncos | fzf )
 }
-alias kdev="gcloud container clusters get-credentials dev --zone europe-west1-b --project camversity-183908"
-alias kstaging="gcloud container clusters get-credentials staging --zone europe-west1-b --project camversity-183908"
-alias kprod="gcloud container clusters get-credentials prod --zone us-east1-b --project camversity-prod"
 alias kblu="export KOPS_STATE_STORE=s3://kube01-kops && kops export kubecfg kube01.blugento.eu"
-alias kblu2="awsblu && export KOPS_STATE_STORE=s3://kube01-kops && kops export kubecfg kube02.blugento.eu"
 alias k_dev_global="cp ~/.kube/dev-global ~/.kube/config"
 alias k_prod_global="cp ~/.kube/prod-global ~/.kube/config"
 alias myshell="kubectl run my-shell-adrian --rm -i --tty --image ubuntu -- bash"
@@ -74,16 +67,6 @@ function kexec {
     kubectl exec -it $POD -n $NS -- sh
   fi
 }
-function kfix {
-  if [ -z $1 ]
-  then
-    NS=$(kubectl get ns | fzf | awk "{print \$1}")
-  else
-    NS=$1
-  fi
-  POD=$(kubectl get pods -n $NS | grep blugento | head -1 | awk "{print \$1}")
-  kubectl exec -it $POD -c php -n $NS -- su -c "cp -rf /var/local/bg-pvc/bg-pvc-*/* /var/local/bg-pvc/"
-}
 function klogs {
   if [ -z $1 ]
   then
@@ -93,10 +76,11 @@ function klogs {
   fi
   POD=$(kubectl get pods -n $NS | fzf | awk "{print \$1}")
   CONTAINERS=$(kubectl get pod $POD -n $NS -o jsonpath='{.spec.containers[*].name}')
+  INITCONTAINERS=$(kubectl get pod $POD -n $NS -o jsonpath='{.spec.initContainers[*].name}')
   COUNT_CONTAINERS=$(echo $CONTAINERS | wc -w | tr -d ' ')
   if [ "$COUNT_CONTAINERS" -gt "1" ]
   then
-    kubectl logs $POD -c $(echo $CONTAINERS | tr " " "\n" | fzf) -n $NS -f
+    kubectl logs $POD -c $(echo -e "$INITCONTAINERS\n$CONTAINERS" | tr " " "\n" | fzf) -n $NS -f
   else
     kubectl logs $POD -n $NS -f
   fi
@@ -127,11 +111,26 @@ function kedit {
   DEPLOY=$(kubectl get deploy -n $NS | fzf | awk "{print \$1}")
   kubectl edit deploy $DEPLOY -n $NS
 }
+function kimg {
+  NS=$(kubectl get ns | fzf | awk "{print \$1}")
+  DEPLOY=$(kubectl get deploy -n $NS | fzf | awk "{print \$1}")
+  echo "initContainers:"
+  kubectl get deployments $DEPLOY -n $NS -o json | jq .spec.template.spec.initContainers | grep '"image":'
+  echo "Containers:"
+  kubectl get deployments $DEPLOY -n $NS -o json | jq .spec.template.spec.containers | grep '"image":'
+}
 function wkp {
   NS=$(kubectl get ns | fzf | awk "{print \$1}")
-  watch "kubectl get pods -n $NS && printf '%20s\n' | tr ' ' - && kubectl get hpa -n $NS"
+  watch "kubectl get pods -o wide -n $NS && printf '%20s\n' | tr ' ' - && kubectl get hpa -n $NS"
 }
 #  kubectl get pods --field-selector=metadata.name=
 #  kubectl get pods POD_NAME_HERE -o jsonpath='{.spec.containers[*].name}'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# tabtab source for serverless package
+# uninstall by removing these lines or running `tabtab uninstall serverless`
+[[ -f /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/serverless.zsh ]] && . /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/serverless.zsh
+# tabtab source for sls package
+# uninstall by removing these lines or running `tabtab uninstall sls`
+[[ -f /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.zsh ]] && . /usr/local/lib/node_modules/serverless/node_modules/tabtab/.completions/sls.zsh
